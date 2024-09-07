@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    :root {
+      --main-bg: #1d1e22;
+      --red: #e81416;
+      --orange: #ffa500;
+      --yellow: #faeb36;
+      --green: #79c314;
+      --blue: #487de7;
+      --indigo: #4b369d;
+      --violet: #70369d;
+    }
+    
+    html {
+      box-sizing: border-box;
+    }
+    
+    *,
+    *::before,
+    *::after {
+      box-sizing: inherit;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      white-space: nowrap;
+      clip: rect(0 0 0 0);
+      clip-path: inset(50%);
+    }
+    
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      /* height: 1px; */
+      font-family: "Tiny5", sans-serif;
+      color: #fff;
+      background-color: var(--main-bg);
+    }
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .container {
+      width: min(100%, 1000px);
+      padding: 15px;
+    }
+    
+    .main-title {
+      font-size: 28px;
+      line-height: 1;
+      text-align: center;
+    }
+    
+    .score {
+      margin-top: 15px;
+      font-size: 20px;
+      text-align: center;
+    }
+    
+    .content {
+      display: flex;
+      gap: 15px;
+      max-width: 480px;
+      margin: 20px auto 0;
+    }
+    
+    .content__column {
+      display: flex;
+      flex-direction: column;
+      width: min(calc((100% - 15px)/2), 100%);
+    }
+    
+    .content__heading {
+      font-size: 16px;
+      text-align: center;
+    }
+    
+    .content__options {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 25px;
+      flex-grow: 1;
+      margin-block: 20px;
+      list-style: none;
+    }
+    
+    .option {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 60px;
+      aspect-ratio: 1/1;
+      background-color: var(--main-bg);
+      border: none;
+      transition: all .4s ease-out;
+    }
+    
+    .option::before,
+    .option::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      translate: -50% -50%;
+      display: block;
+      transition: all .4s ease-out;
+      background-position: center;
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+    
+    .option::before {
+      width: calc(100% + 10px);
+      height: 100%;
+      border-inline: 5px solid #fff;
+    }
+    
+    .option::after {
+      width: 100%;
+      height: calc(100% + 10px);
+      border-block: 5px solid #fff;
+      z-index: 1;
+    }
+    
+    .option:not(#computer) {
+      cursor: pointer;
+    }
+    
+    #computer {
+      cursor: not-allowed;
+    }
+    
+    .option:not(#computer):hover,
+    .option:not(#computer):hover {
+      scale: 1.1;
+    }
+    
+    .option:not(#computer):focus,
+    .option:not(#computer):active {
+      box-shadow: 0 0 30px 0 #fff;
+    }
+    
+    .rock::after {
+      background-image: url("data:image/png;base64,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");
+    }
+    
+    .paper::after {
+      background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAACXBIWXMAAAffAAAH3wHPRUmFAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAACbBJREFUeJzt3bGNG0cAhlGusSEBJi5AkVmDEiVXwAHXw+HS6+DWZRDugYBbcOIa7MgFOBGgfN2AA5tDaEB87+XD+UEJ0odJeDgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHCLZfYAYJ7t7WWfev/l6t8gmOSH2QMAgO9PAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIWmcPAG63vb3sI+c/Xp/vNeVWQ/u3y3W51xCo8QIAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAEDQOnsAPLLt7WXo9+wZM/v73y7XZeb9MMILAAAECQAACBIAABAkAAAgSAAAQJAAAIAgAQAAQQIAAIIEAAAECQAACBIAABAkAAAgSAAAQJAAAIAgAQAAQevsATDT6O/Jf7w+32vKTX7+5dep9882+/s/HA5Df3+2y3W51xD4v7wAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQtM4eANzu/cvT7AlDHn0/PDIvAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABK2zBwBUbW8v+9T7L9dl5v3M5QUAAIIEAAAECQAACBIAABAkAAAgSAAAQJAAAIAgAQAAQQIAAIIEAAAECQAACBIAABAkAAAgSAAAQJAAAICgdfYAgKqP1+fZE/aRw9vlutxrCN+fFwAACBIAABAkAAAgSAAAQJAAAIAgAQAAQQIAAIIEAAAECQAACBIAABAkAAAgSAAAQJAAAIAgAQAAQQIAAILW2QMAHtX7l6fZE+BmXgAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAhaZw8Abnc6H2dPGPLo++GReQEAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBonT2AMdvbyz71/st1mXk/zHQ6H2dPgJt5AQCAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIGidPaBue3vZR85/vD7fa8qthvZvl+tyryEA/HdeAAAgSAAAQJAAAIAgAQAAQQIAAIIEAAAECQAACBIAABAkAAAgSAAAQJAAAIAgAQAAQQIAAIIEAAAECQAACFpnD+Cxfbw+j37EPnJ4u1yX0QEARV4AACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIWmcPYMzXP74NnT+dj3dacpuP1+fRj9gn3w/wkLwAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQtM4eULddrsvgR+wjh98PT0OXn87HofOjPl6fp94P8Ki8AABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAELTOHsCY7XJdBj9iHzn8fngauvx0Pg6dB+A2XgAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAhaZw9gru1yXQY/Yh85/H54Grr8dD4OnQeo8gIAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAEDQOnsAj227XJfBj9hHDr8fnoYuP52PQ+cBHpUXAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAgtbZA2jbLtdl8CP2kcPvh6ehy0/n49B5gFm8AABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAELTOHgAjtst1GfyIfeTw++Fp6PLT+Th0nravf3ybPYEH5gUAAIIEAAAECQAACBIAABAkAAAgSAAAQJAAAIAgAQAAQQIAAIIEAAAECQAACBIAABAkAAAgSAAAQJAAAICgdfYAeGSn83Ho/Ozfcx/dP9vs72+24T+/3+6zg8fkBQAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgKB19gAoG/499zjfH9zOCwAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEHL7AHwyPa/ft+HPuDvP++0hKQffxo6vnz67P+AMC8AABAkAAAgSAAAQJAAAIAgAQAAQQIAAIIEAAAECQAACBIAABAkAAAgSAAAQJAAAIAgAQAAQQIAAIIEAAAE+S1omGj/6/d99gYe1/Lps3/DuZkXAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgH/1D+2GaScPNnpYAAAAAElFTkSuQmCC");
+    }
+    
+    .scissors::after {
+      background-image: url("data:image/png;base64,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");
+    }
+    
+    .undefined::after {
+      background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAACXBIWXMAAXnzAAF58wEQNG6xAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAB2JJREFUeJzt2aFuVEEYhuG/zaLQWDRYiu2lYOGelmtqNXax1ejlBlYOHXre50nGf5nkJG/OzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/o7vdA2ChTzPzfvcIDu3PzPzaPQJWEAAcydPMfNk9gkN7npmH3SNghfvdAwCA1ycAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACDotHsA2113D1jo68w87R7BoT3Msb6Zu90D2McfAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgKDT7gFs92P3gIUuuwdw0+PMfNs9YpGXOdY3AwD/zPeZuR7kPC2+G9jGEwAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABJ12DwBuepyZz7tHLPJuZn7uHrHIZfcAAI7tPDPXg5zz4rsBFvAEAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBAgAAggQAAAQJAAAIEgAAECQAACBIAABAkAAAgCABAABBp90DgJsuM/O8e8Qil90DAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgDfnPDPXg5zz4rsBFrjfPQAAeH0CAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACCBAAABAkAAAgSAAAQJAAAIEgAAECQAACAIAEAAEECAACC7nYPAG76ODMfdo9Y5GVmfu8eAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABvwV+jJqxN32RGpgAAAABJRU5ErkJggg==");
+      background-color: #fff;
+    }
+    
+    .winner {
+      background-image: linear-gradient(to right, var(--red), var(--orange), var(--yellow), var(--green), var(--blue), var(--indigo), var(--violet), var(--red));
+      background-size: 200%;
+      background-position: 0 0;
+      scale: 1.2;
+      animation: bg 5s linear infinite, tada 1s linear;
+    }
+    
+    .button {
+      position: relative;
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      margin: 15px auto 0;
+      padding: 15px;
+      font-size: 16px;
+      line-height: 1.5;
+      font-family: inherit;
+      text-align: center;
+      text-transform: uppercase;
+      color: #ffffff;
+      border: none;
+      background: none;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    
+    .button::before,
+    .button::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      translate: -50% -50%;
+      display: block;
+      z-index: -1;
+    }
+    
+    .button::before {
+      width: 100vw;
+      height: 100vh;
+      background-image: repeating-conic-gradient(var(--red),
+          var(--orange),
+          var(--yellow),
+          var(--green),
+          var(--blue),
+          var(--indigo),
+          var(--violet));
+      animation: rotation 8s linear infinite;
+      filter: blur(15px);
+    }
+    
+    .button::after {
+      width: calc(100% - 16px);
+      height: calc(100% - 16px);
+      background-color: var(--main-bg);
+      transition: all 0.4s linear;
+    }
+    
+    .button:hover::before {
+      animation-play-state: paused;
+    }
+    
+    @supports(background-clip: text) or (-webkit-background-clip: text) {
+      .gradient-text {
+        color: transparent;
+        background: linear-gradient(to right, var(--red), var(--orange), var(--yellow), var(--green), var(--blue), var(--indigo), var(--violet), var(--red));
+        background-size: 200%;
+        background-position: 0 0;
+        -webkit-background-clip: text;
+        background-clip: text;
+        animation: bg 5s linear infinite;
+      }
+    }
+    
+    @keyframes bg {
+      to {
+        background-position: -200% 0;
+      }
+    }
+    
+    @keyframes tada {
+      0% {
+        -webkit-transform: scaleX(1);
+        transform: scaleX(1)
+      }
+    
+      10%,
+      20% {
+        -webkit-transform: scale3d(.9, .9, .9) rotate(-3deg);
+        transform: scale3d(.9, .9, .9) rotate(-3deg)
+      }
+    
+      30%,
+      50%,
+      70%,
+      90% {
+        -webkit-transform: scale3d(1.1, 1.1, 1.1) rotate(3deg);
+        transform: scale3d(1.1, 1.1, 1.1) rotate(3deg)
+      }
+    
+      40%,
+      60%,
+      80% {
+        -webkit-transform: scale3d(1.1, 1.1, 1.1) rotate(-3deg);
+        transform: scale3d(1.1, 1.1, 1.1) rotate(-3deg)
+      }
+    
+      to {
+        -webkit-transform: scaleX(1);
+        transform: scaleX(1)
+      }
+    }
+    
+    
+    @keyframes rotation {
+      0% {
+        rotate: 0deg;
+      }
+    
+      100% {
+        rotate: 360deg;
+      }
+    }
+    
+    @keyframes rotation-inverted {
+      0% {
+        rotate: 0deg;
+      }
+    
+      100% {
+        rotate: -360deg;
+      }
+    }
+    
+    
+    @media (min-width: 460px) {
+      .container {
+        padding: 30px 15px;
+      }
+    
+      .main-title {
+        font-size: 32px;
+      }
+    
+      .content {
+        margin-block-start: 30px;
+      }
+    
+      .content__heading {
+        font-size: 20px;
+      }
+    
+      .content__options {
+        margin-block: 60px 40px;
+      }
+    
+      /* .content__options--circle {
+        position: relative;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-content: space-between;
+        width: 230px;
+        height: 230px;
+        margin-inline: auto;
+        animation: rotation 24s infinite linear;
+      }
+    
+      .content__options--circle::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: block;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 5px solid #fff;
+      }
+    
+      .content__option:nth-child(1) {
+        translate: 0 -50%;
+        margin-inline: calc((100% - 60px)/2);
+      }
+    
+    
+      .content__option:nth-child(2) {
+        translate: -25% -25%;
+      }
+    
+      .content__option:nth-child(3) {
+        translate: 25% -25%;
+      }
+    
+      .content__options--circle .content__option {
+        animation: rotation-inverted 24s infinite linear;
+      }
+    
+      .content__options--circle:hover,
+      .content__options--circle:hover .content__option {
+        animation-play-state: paused;
+      } */
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+
+  <div class="container">
+    <h1 class="main-title gradient-text">Rock, Paper, Scissors</h1>
+
+    <section class="content">
+      <div class="content__column">
+        <h2 class="content__heading"><span class="gradient-text">Player #1:</span> you</h2>
+        <div class="content__options content__options--circle">
+          <button class="content__option option rock" data-option="rock">
+            <span class="visually-hidden">rock</span>
+          </button>
+          <button class="content__option option paper" data-option="paper">
+            <span class="visually-hidden">paper</span>
+          </button>
+          <button class="content__option option scissors" data-option="scissors">
+            <span class="visually-hidden">scissors</span>
+          </button>
+        </div>
+      </div>
+      <div class="content__column">
+        <h2 class="content__heading"><span class="gradient-text">Player #2:</span> PC</h2>
+        <div class="content__options">
+          <div class="content__option option undefined" data-option="undefined" id="computer">
+            <span class="visually-hidden">undefined</span>
+          </div>
+        </div>
+    </section>
+    <button class="button reset">Reset</button>
+  </div>
+  <script>
+    "use strict";
+
+const options = [`rock`, `paper`, `scissors`];
+const optionButtons = document.querySelectorAll("button.option");
+const computer = document.querySelector("#computer");
+const computerHiddenText = computer.querySelector(".visually-hidden");
+const resetButton = document.querySelector(".reset");
+const overlay = document.querySelector(".overlay");
+
+const computerSetting = function (value) {
+  computer.classList.remove(`undefined`, `rock`, `paper`, `scissors`);
+  computer.classList.add(value);
+  computer.dataset.option = value;
+  computerHiddenText.textContent = value;
+};
+
+const reset = function () {
+  if (!computer.classList.contains(`undefined`)) {
+    computerSetting(`undefined`);
+  }
+  if (document.querySelector(`.winner`)) {
+    document.querySelectorAll(`.winner`).forEach(function (item) {
+      item.classList.remove(`winner`);
+    });
+  }
+};
+
+optionButtons.forEach(function (button) {
+  button.addEventListener("click", function (evt) {
+    evt.preventDefault();
+
+    if (document.querySelector(`.winner`)) {
+      document.querySelectorAll(`.winner`).forEach(function (item) {
+        item.classList.remove(`winner`);
+      });
+    }
+
+    const playerOption = this.dataset.option;
+    const randomNumber = Math.trunc(Math.random() * options.length);
+    const computerOption = options[randomNumber];
+
+    computerSetting(computerOption);
+
+    setTimeout(() => {
+      if (playerOption === computerOption) {
+        this.classList.add(`winner`);
+        computer.classList.add(`winner`);
+      } else if (
+        (playerOption === `rock` && computerOption === `scissors`) ||
+        (playerOption === `paper` && computerOption === `rock`) ||
+        (playerOption === `scissors` && computerOption === `paper`)
+      ) {
+        this.classList.add(`winner`);
+      } else {
+        computer.classList.add(`winner`);
+      }
+    }, 1);
+  });
+});
+
+resetButton.addEventListener("click", function (evt) {
+  evt.preventDefault();
+  reset();
+});
+
+overlay.addEventListener("click", function (evt) {
+  evt.preventDefault();
+  reset();
+});
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+  <html lang="pt-br">
+    <head>
+      <meta charset="UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Document</title>
+      <style>
+        *{
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        
+        body{
+          text-align: center;
+          display: flex;
+          height: 100vh;
+          width: 100%;
+          justify-content: center;
+          align-items: center;
+          padding: 0 20px;
+          background-image: url('https://images6.alphacoders.com/129/1293436.jpg');
+          background-size: cover;
+          background-repeat: no-repeat;
+        }
+        .nav{
+          display: inline-flex;
+          position: relative;
+          max-width: 100%;
+          backdrop-filter: blur(5px);
+          padding: 0 20px;
+          border-radius: 6px;
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 16px;
+          box-shadow: 0 10px 40px rgba(23,23,23,0.8);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(170, 169, 171, 0.3);
+        }
+        .nav-item{
+          color: #83818c;
+          padding: 20px;
+          text-decoration: none;
+          transition: .3s;
+          margin: 0 6px;
+          z-index: 1;
+          font-size: 2rem;
+          font-family: 'Inter', sans-serif;
+          font-weight: 700;
+          position: relative;
+        }
+        .nav-item:before{
+          content: "";
+          position: absolute;
+          bottom: -6px;
+          left: 0;
+          width: 100%;
+          height: 5px;
+          background-color: #dfe2ea;
+          border-radius: 8px 8px 0 0;
+          opacity: 0;
+          transition: .3s;
+        }
+        .nav-item:not(.is-active):hover:before{
+          opacity: 1;
+          bottom: 0;
+        }
+        .nav-item:not(.is-active):hover{
+          color: rgba(23,23,23,0.8);
+        }
+        .nav-indicator{
+          position: absolute;
+          left: 0;
+          bottom: 0;
+          height: 4px;
+          transition: .4s;
+          height: 5px;
+          z-index:1;
+          border-radius: 8px 8px 0 0;
+        }
+        @media (max-width: 580px){
+          .nav{
+            overflow-y: hidden;
+            overflow-X: auto;
+          }
+          .nav-item{
+            margin: 0 14px;
+          }
+          .nav::-webkit-scrollbar{
+            display: none;
+          }
+        }
+      </style>
+    </head>
+    <body>
+
+      <nav class="nav">
+        <a href="#" class="nav-item is-active" active-color="#9970FD">CodingHashira</a>
+        <a href="#" class="nav-item" active-color="blue">Projects</a>
+        <a href="#" class="nav-item" active-color="green">About</a>
+        <a href="#" class="nav-item" active-color="orange">Blog</a>
+        <a href="#" class="nav-item" active-color="red">Contact</a>
+        <span class="nav-indicator"></span>
+      </nav><!--nav-->
+
+      <script>
+        const indicator = document.querySelector('.nav-indicator');
+const items = document.querySelectorAll('.nav-item'); 
+
+function handleIndicator(el){
+
+  items.forEach(item => {
+    item.classList.remove('is-active');
+    item.removeAttribute('style');
+  });
+
+  indicator.style.width = `${el.offsetWidth}px`;
+  indicator.style.left = `${el.offsetLeft}px`;
+  indicator.style.backgroundColor = el.getAttribute('active-color');
+
+  el.classList.add('is-active');
+  el.style.color = el.getAttribute('active-color'); 
+
+}
+
+items.forEach((item, index) => {
+
+  item.addEventListener("click", (e) => {handleIndicator(e.target)});
+  item.classList.contains('is-active') && handleIndicator(item);
+
+});
+      </script>
+    </body>
+  </html>

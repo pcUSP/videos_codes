@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    *{
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body{
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #1b1b1b;
+    }
+    .card{
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 220px;
+      height: 220px;
+      flex-direction: column;
+    }
+    .card .percent{
+      position: relative;
+      width: 150px;
+      height: 150px;
+    }
+    .card .percent svg{
+      position: relative;
+      width: 150px;
+      height: 150px;
+      transform: rotate(270deg);
+    }
+    .card .percent svg circle{
+      width: 100%;
+      height: 100%;
+      fill:transparent;
+      stroke-width: 2;
+      stroke: rgb(0,0,0);
+      transform: translate(5px,5px);
+    }
+    .card .percent svg circle:nth-child(2){
+      stroke: var(--clr);
+      stroke-dasharray:440;
+      stroke-dashoffset: 440;
+      animation: barFills 2s linear forwards;
+    }
+    .dot{
+      position: absolute;
+      inset: 5px;
+      z-index: 100;
+      animation:animateDot 2s linear forwards;
+    }
+    .dot::before{
+      content: '';
+      position: absolute;
+      top:-5px;
+      left: 50%;
+      width: 10px;
+      height: 10px;
+      background: var(--clr);
+      border-radius: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 0 10px var(--clr), 0 0 30px var(--clr);
+    }
+    .number{
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      color:black;
+      font-family: cursive;
+    }
+    .number h2{
+      font-weight: 700;
+      font-size: 2.54em;
+    }
+    .number h2 span{
+      font-size: .5em;
+    }
+    .card h2{
+      letter-spacing: 4px;
+      color: whitesmoke;
+    }
+    @keyframes animateDot{
+      0%{
+        transform: rotate(0deg);
+      }
+      100%{
+        transform: rotate(calc(3.6deg+var(--num)));
+      }
+    }
+    @keyframes barFills{
+      100%{
+        stroke-dashoffset: 66;
+        /* calc(440 - (440 * var(--num)) / 100 */
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="card">
+    <div class="percent" style="--clr:#F36B9E;--num:85">
+      <div class="dot"></div>
+      <svg>
+        <circle cx="70" cy="70" r="70"></circle>
+        <circle cx="70" cy="70" r="70"></circle>
+      </svg>
+      <div class="number">
+        <h2 class="percentNum"></h2>
+      </div><!--number-->
+    </div><!--percent-->
+    <h2>HTML</h2>
+  </div><!--card-->
+  
+  <div class="card">
+    <div class="percent" style="--clr:#F36B9E;--num:65">
+      <div class="dot"></div>
+      <svg>
+        <circle cx="70" cy="70" r="70"></circle>
+        <circle cx="70" cy="70" r="70"></circle>
+      </svg>
+      <div class="number">
+        <h2 class="percentNum"></h2>
+      </div><!--number-->
+    </div><!--percent-->
+    <h2>CSS</h2>
+  </div><!--card-->
+
+  <div class="card">
+    <div class="percent" style="--clr:#F36B9E;--num:90">
+      <div class="dot"></div>
+      <svg>
+        <circle cx="70" cy="70" r="70"></circle>
+        <circle cx="70" cy="70" r="70"></circle>
+      </svg>
+      <div class="number">
+        <h2 class="percentNum"></h2>
+      </div><!--number-->
+    </div><!--percent-->
+    <h2>JavaScript</h2>
+  </div><!--card-->
+
+  <div class="card">
+    <div class="percent" style="--clr:#F36B9E;--num:75">
+      <div class="dot"></div>
+      <svg>
+        <circle cx="70" cy="70" r="70"></circle>
+        <circle cx="70" cy="70" r="70"></circle>
+      </svg>
+      <div class="number">
+        <h2 class="percentNum"></h2>
+      </div><!--number-->
+    </div><!--percent-->
+    <h2>React</h2>
+  </div><!--card-->
+
+  <script>
+    const percents = document.querySelectorAll('.percent');
+    
+    percents.forEach(percent => {
+      let counter = 0;
+      const numElement = percent.querySelector('.percentNum');
+      const targetNum = percent.style.getPropertyValue('--num');
+      
+      const interval = setInterval(() => {
+        if(counter < targetNum){
+          counter++;
+          numElement.innerHTML = `${counter}<span>%</span>`;
+        } else {
+          clearInterval(interval);
+        }
+      }, 2000 / targetNum); // Ajuste a duração de acordo com a porcentagem
+    });
+  </script>
+
+</body>
+</html>
